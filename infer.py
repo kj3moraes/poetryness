@@ -9,7 +9,7 @@ import subprocess
 
 TEMPLATE_TOML = """
 [tool.poetry]
-name = "poetryness"
+name = "project"
 version = "0.1.0"
 authors = []
 description = ""
