@@ -23,16 +23,17 @@ Copy the infer.py to `~/.local/bin` and then you can run this anywhere on your s
 
 ## Caveats
 
-There are some gotchas to using this script 
+There are some gotchas to using this script
 
 ### pyproject.toml
 
 - the author field is unpopulated
 - the description is unpopulated
 - the version is hardcoded to 0.1.0
+- python version is hardcoded to 3.10 or above
 - there is a default name for the project.
 
-All of these can be fixed by manually editing the medata in the toml file.
+All of these can be fixed by manually editing the metadata in the toml file.
 
 ### .venv
 
