@@ -1,21 +1,21 @@
 #!/usr/bin/python3
 
+import argparse
 import os
-import sys
-from pathlib import Path
 import re
 import subprocess
-
+import sys
+from pathlib import Path
 
 TEMPLATE_TOML = """
 [tool.poetry]
-name = "project"
+name = "{{project}}"
 version = "0.1.0"
-authors = []
+authors = {{authors}}
 description = ""
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^{{version}}"
 
 
 [build-system]
@@ -57,23 +57,62 @@ def create_requirements(directory, output_file="requirements.txt"):
             file.write(module + "\n")
 
 
-if len(sys.argv) < 3:
-    print(
-        "You must 2 arguments.\nUSAGE: python3 infer.py <input_dir_path> <output_dir_path>"
-    )
-    exit(1)
+# Create the parser
+parser = argparse.ArgumentParser(description="Process some inputs.")
 
-input_dir_path = Path(sys.argv[1])
-output_dir_path = Path(sys.argv[2])
+# Add the required arguments
+parser.add_argument("input_dir", help="Path to the input directory")
+parser.add_argument("output_dir", help="Path to the output directory")
+
+# Add the optional arguments
+parser.add_argument("-n", "--name", type=str, help="Name of the Project")
+parser.add_argument("-a", "--authors", nargs="+", help="List of authors")
+parser.add_argument("-p", "--py_version", type=str, help="Python Version number")
+parser.add_argument(
+    "-r",
+    "--remove_reqs",
+    action="store_true",
+    help="Remove the requirements.txt file after generation",
+)
+parser.add_argument(
+    "--norun",
+    action="store_true",
+    help="Doesn't run the poetry installation to generate a lock file"
+    
+)
+# Parse the arguments
+args = parser.parse_args()
+
+# Store values in variables
+input_dir = args.input_dir
+output_dir = args.output_dir
+author_names = ", ".join([f'\"{author}\"' for author in args.authors]) if args.authors is not None else ""
+authors = f"[{author_names}]"
+version = args.py_version if args.py_version is not None else "3.10"
+name = args.name if args.name is not None else "project"
+remove_reqs = args.remove_reqs if args.remove_reqs is not None else False
+not_runnable = args.norun if args.norun is not None else False
+
+input_dir_path = Path(input_dir)
+output_dir_path = Path(output_dir)
 
 # Create the requirements file in the output location
 create_requirements(input_dir_path, output_file=(output_dir_path / "requirements.txt"))
 
-# Make a dummy pyproject.toml file
+# Make a pyproject.toml file
+TEMPLATE_TOML = (
+    TEMPLATE_TOML.replace("{{authors}}", authors)
+    .replace("{{project}}", name)
+    .replace("{{version}}", version)
+)
 with open(output_dir_path / "pyproject.toml", "w+") as outfile:
     outfile.write(TEMPLATE_TOML)
 
-# Use the requirements to populate the pyproject.toml
-subprocess.run(
-    "cat requirements.txt | xargs poetry add", shell=True, cwd=output_dir_path
-)
+# Use the requirements to populate the pyproject.toml (runs by default)
+if not not_runnable:
+    subprocess.run(
+        "cat requirements.txt | xargs poetry add", shell=True, cwd=output_dir_path
+    )
+
+if remove_reqs:
+    os.remove(output_dir_path / "requirements.txt")
