@@ -1,6 +1,7 @@
 # poetryness
 
-Script to automate poetry's setup from existing projects.
+Script to automate poetry's setup from existing projects. It will read all the .py files in a directory and make an "unpinned" requirements.txt
+file and from this requirements.txt file, a base pyproject.toml file is generated and the dependencies are installed.
 
 ## Usage
 
