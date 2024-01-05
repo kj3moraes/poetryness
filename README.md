@@ -22,21 +22,18 @@ To use the script, simply navigate to this directory
 Copy the infer.py to `~/.local/bin` and then you can run this anywhere on your system.
 
 
-## Caveats
+### Optional Arguments
 
-There are some gotchas to using this script
+There are some optional arguments that you can pass to the script to alter some of the behaviour:
 
-### pyproject.toml
+- `-a` \ `--authors` allows you to specify the list of authors
+- `-n` \ `--name` allows you to specify the project name 
+- `-p` \ `--pyversion` allows you to specify the python version
+- `--norun` will only generate the pyproject.toml but won't install anything
+- `--remove_reqs` will remove the requirements.txt file after generation
 
-- the author field is unpopulated
-- the description is unpopulated
-- the version is hardcoded to 0.1.0
-- python version is hardcoded to 3.10 or above
-- there is a default name for the project.
+You can also use the help command to get a quick glance of all the arguments
 
-All of these can be fixed by manually editing the metadata in the toml file.
-
-### .venv
-
-All the packages by design will be installed in the output directory. It does not make use of the
-~/.cache directory where the poetry venvs usually go.
+```bash
+./infer.py --help
+```
