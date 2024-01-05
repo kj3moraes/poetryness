@@ -1,13 +1,28 @@
+#!/usr/bin/env python3
+
 import os
 import sys
-import pkgutil
 from pathlib import Path
 import re
+import subprocess
 
-def get_standard_library_list():
-    """ Get a list of standard library modules. """
-    std_lib = [module for _, module, _ in pkgutil.iter_modules()]
-    return std_lib
+
+TEMPLATE_TOML = """
+[tool.poetry]
+name = "poetryness"
+version = "0.1.0"
+authors = []
+description = ""
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+"""
+
 
 def extract_imports(file_path):
     """ Extract import statements from a Python file. """
@@ -37,10 +52,20 @@ def create_requirements(directory, output_file='requirements.txt'):
         for module in sorted(external_modules):
             file.write(module + '\n')
 
-# Example usage
 
-dir_path = sys.argv[1]
+if len(sys.argv) < 3:
+    print("You must 2 arguments.\nUSAGE: python3 infer.py <input_dir_path> <output_dir_path>")
+    exit(1)
 
-directory_path = Path(dir_path) 
+input_dir_path = Path(sys.argv[1])
+output_dir_path = Path(sys.argv[2])
 
-create_requirements(directory_path)
+# Create the requirements file in the output location
+create_requirements(input_dir_path, output_file=(output_dir_path / 'requirements.txt'))
+
+# Make a dummy pyproject.toml file
+with open(output_dir_path / "pyproject.toml", "w+") as outfile:
+    outfile.write(TEMPLATE_TOML)
+
+# Use the requirements to populate the pyproject.toml
+subprocess.run('cat requirements.txt | xargs poetry add', shell=True, cwd=output_dir_path)
